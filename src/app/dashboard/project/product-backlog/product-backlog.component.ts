@@ -1,50 +1,64 @@
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Project } from 'src/app/interfaces/project.interface';
 
-import { ProductBacklog} from '../../../interfaces/story.interface';
+import { ProductBacklog } from '../../../interfaces/story.interface';
 import { User } from '../../../interfaces/user.interface';
 import { StoryModalComponent } from '../../../modals/story-modal/story-modal.component';
 import { RootStore } from '../../../store/root.store';
-import { Project } from 'src/app/interfaces/project.interface';
 
 @Component({
   selector: "app-product-backlog",
   templateUrl: "./product-backlog.component.html",
   styleUrls: ["./product-backlog.component.scss"],
 })
-export class ProductBacklogComponent implements OnInit {
-  isAdmin: boolean;
+export class ProductBacklogComponent implements OnInit, OnDestroy {
   user: User;
+  isAdmin: boolean;
   userRoles: string[];
 
   project: Project;
+  storiesToSprintActive: boolean = false;
 
   productBacklog: ProductBacklog;
 
-  constructor(
-    private route: ActivatedRoute,
-    private rootStore: RootStore,
-    private dialog: MatDialog
-  ) {}
+  destroy$ = new Subject<boolean>();
+
+  constructor(private rootStore: RootStore, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.rootStore.userStore.user$.subscribe((user) => {
-      this.isAdmin = user.is_superuser;
-    });
+    this.rootStore.userStore.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        this.isAdmin = user.is_superuser;
+      });
 
-    this.rootStore.projectStore.activeProject$.subscribe((project) => {
-      this.project = project;
-    });
+    this.rootStore.projectStore.activeProject$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((project) => {
+        this.project = project;
+      });
 
-    this.rootStore.storyStore.allStories$.subscribe((stories) => {
-      this.productBacklog = stories;
-    });
+    this.rootStore.storyStore.allStories$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((stories) => {
+        this.productBacklog = stories;
+        console.log(stories);
+      });
 
-    this.rootStore.userStore.userRoles$.subscribe((userRoles)=>{
-      this.userRoles = userRoles ?? [];
-    })
+    this.rootStore.userStore.userRoles$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((userRoles) => {
+        this.userRoles = userRoles ?? [];
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next(true);
+    this.destroy$.complete();
   }
 
   addStory() {
@@ -52,7 +66,7 @@ export class ProductBacklogComponent implements OnInit {
       .open(StoryModalComponent, {
         data: {
           projectId: this.project.id,
-          tests: []
+          tests: [],
         },
       })
       .afterClosed()
@@ -64,9 +78,19 @@ export class ProductBacklogComponent implements OnInit {
       });
   }
 
+  activateActiveSprint() {
+    this.storiesToSprintActive = true;
+  }
+
   // TODO: potrebno implementirati določanje časovne zahtevnosti
   // TODO: isto funkcijo lahko v prihodnjem sprintu uporabimo za implementacijo urejanja uporabniških zgodb
-  editStory(title: string, description: string, tests: string[], businessValue: number, priorityId: number) {
+  editStory(
+    title: string,
+    description: string,
+    tests: string[],
+    businessValue: number,
+    priorityId: number
+  ) {
     console.log("edit story");
 
     /* this.dialo

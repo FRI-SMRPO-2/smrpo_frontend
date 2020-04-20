@@ -1,4 +1,4 @@
-<div class="task-card">
+<div class="task-card" [class.task-disabled]="disabled">
     <div>
       <div class="priority-text" [ngClass]="{
         'orange': task.priority.id === 1,
