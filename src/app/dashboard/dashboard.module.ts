@@ -8,6 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ModalsModule } from '../modals/modals.module';
@@ -47,6 +48,7 @@ import { TaskCardComponent } from './project/task-card/task-card.component';
     MatDividerModule,
     MatIconModule,
     MatCheckboxModule,
+    MatSnackBarModule,
   ],
 })
 export class DashboardModule {}

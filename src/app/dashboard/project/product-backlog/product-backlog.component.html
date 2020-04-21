@@ -9,22 +9,38 @@
         *ngIf="userRoles.includes('Scrum Master') || userRoles.includes('Product Owner') || isAdmin"
         class="dialog-button"
         class="pink-btn"
-        (click)="addStory()">Dodaj novo zgodbo
+        (click)="addStory()"> Dodaj novo zgodbo
       </button>
     </div>
 
     <button
       mat-raised-button
       color="primary"
-      *ngIf="userRoles.includes('Scrum Master') || userRoles.includes('Product Owner') || isAdmin"
+      *ngIf="(userRoles.includes('Scrum Master') || userRoles.includes('Product Owner') || isAdmin) && !storiesToSprintActive"
       class="dialog-button"
-      (click)="activateActiveSprint()">Izbira zgodb za aktivni sprint
+      (click)="activateActiveSprint()"> Izbira zgodb za aktivni sprint
+    </button>
+    <button
+      mat-raised-button
+      color="accent"
+      *ngIf="(userRoles.includes('Scrum Master') || userRoles.includes('Product Owner') || isAdmin) && storiesToSprintActive"
+      class="dialog-button"
+      [disabled]="!activeStories.length"
+      (click)="addStoriesToActiveSprint()"> Dodaj zgodbe v aktivni sprint
     </button>
   </div>
 
   <div id="sprint-speed-row" *ngIf="storiesToSprintActive">
     <span id="speed-text">Hitrost sprinta:</span>
-    <span id="sprint-speed">0 / 10</span>
+    <span id="sprint-speed" [class.alert]="activeStoriesSum > activeSprint.expected_speed"> {{activeStoriesSum}}</span>
+    <span id="sprint-speed">/ {{activeSprint.expected_speed}} </span>
+    <button 
+      mat-stroked-button 
+      color="primary"
+      *ngIf="(userRoles.includes('Scrum Master') || userRoles.includes('Product Owner') || isAdmin) && storiesToSprintActive"
+      style="margin-left: 20px"
+      (click)="cancelAddToActiveSprint()"> Prekliči
+    </button>
   </div>
 
   <div class="sorting-titles">
@@ -37,13 +53,17 @@
       <span class="section-title"> Nedodeljene zgodbe </span>
       <div class="data-column">
         <div class="data-cell" *ngFor="let story of productBacklog.unassigned">
-          <mat-checkbox *ngIf="storiesToSprintActive" color="primary" [disabled]="!story.time_complexity"></mat-checkbox>
+          <mat-checkbox 
+            *ngIf="storiesToSprintActive" 
+            color="primary" 
+            [disabled]="!story.time_complexity" 
+            (change)="checkStoryToActiveSprint($event, story)">
+          </mat-checkbox>
           <app-task-card
             [ngStyle]="{'width': storiesToSprintActive ? 'calc(100% - 40px)' : '100%'}"
-            [task]="story"
+            [story]="story"
             [disabled]="storiesToSprintActive && !story.time_complexity"
-            (editButtonClick)="editStory(story.name, story.text, story.tests, story.business_value, story.priority.id)"
-          >
+            (editButtonClick)="editStory(story.name, story.text, story.tests, story.business_value, story.priority.id)">
           </app-task-card>
         </div>
       </div>
@@ -52,7 +72,7 @@
       <span class="section-title"> Dodeljene zgodbe </span>
       <div class="data-column">
         <app-task-card
-          [task]="story"
+          [story]="story"
           *ngFor="let story of productBacklog.assigned"
           (editButtonClick)="editStory(story.name, story.text, story.tests, story.business_value, story.priority.id)"
         >
@@ -62,7 +82,7 @@
       <span class="section-title">Realizirane zgodbe</span>
       <div class="data-column">
         <app-task-card
-          [task]="story"
+          [story]="story"
           *ngFor="let story of productBacklog.realized"
           (editButtonClick)="editStory(story.name, story.text, story.tests, story.business_value, story.priority.id)"
         >
