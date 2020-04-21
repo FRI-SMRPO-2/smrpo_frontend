@@ -20,6 +20,7 @@ import { ProductBacklogComponent } from './project/product-backlog/product-backl
 import { ProjectComponent } from './project/project.component';
 import { SprintBacklogComponent } from './project/sprint-backlog/sprint-backlog.component';
 import { SprintStoryComponent } from './project/sprint-backlog/sprint-story/sprint-story.component';
+import { StoryTaskComponent } from './project/sprint-backlog/sprint-story/story-task/story-task.component';
 import { SprintPanelComponent } from './project/sprint-panel/sprint-panel.component';
 import { TaskCardComponent } from './project/task-card/task-card.component';
 
@@ -33,6 +34,7 @@ import { TaskCardComponent } from './project/task-card/task-card.component';
     ProductBacklogComponent,
     SprintBacklogComponent,
     SprintStoryComponent,
+    StoryTaskComponent,
   ],
   imports: [
     CommonModule,

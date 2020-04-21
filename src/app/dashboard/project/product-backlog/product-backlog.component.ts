@@ -154,7 +154,7 @@ export class ProductBacklogComponent implements OnInit, OnDestroy {
   ) {
     console.log("edit story");
 
-    /* this.dialo
+    /* this.dialog
       .open(StoryModalComponent, {
         data: {
           projectId: this.project.project.id,
